@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from scipy.signal import lfilter
-
+#正文
 class SignalCanvas(FigureCanvas):
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
@@ -127,6 +127,7 @@ class ADConverterApp(QMainWindow):
         self.bits.currentIndexChanged.connect(self.update_signal)
         output_params_layout.addWidget(self.bits, 0, 1)
         
+        # Sampling rate
         output_params_layout.addWidget(QLabel("采样率 (Hz):"), 1, 0)
         self.sample_rate = QSpinBox()
         self.sample_rate.setRange(100, 10000)
@@ -141,6 +142,7 @@ class ADConverterApp(QMainWindow):
         self.ref_voltage.valueChanged.connect(self.update_signal)
         output_params_layout.addWidget(self.ref_voltage, 2, 1)
         
+        # PWM frequency (new parameter)
         output_params_layout.addWidget(QLabel("PWM频率 (Hz):"), 3, 0)
         self.pwm_frequency = QSpinBox()
         self.pwm_frequency.setRange(50, 5000)
@@ -189,32 +191,37 @@ class ADConverterApp(QMainWindow):
         wave_type = self.wave_type.currentText()
         frequency = self.frequency.value()
         amplitude = self.amplitude.value()
-        duty_cycle = self.duty_cycle.value() / 100
+        duty_cycle = self.duty_cycle.value() / 100  # Convert to fraction
         sample_rate = self.sample_rate.value()
         bits_text = self.bits.currentText()
         bits = int(bits_text.replace("位", ""))
         ref_voltage = self.ref_voltage.value()
-        pwm_frequency = self.pwm_frequency.value()
+        pwm_frequency = self.pwm_frequency.value()  # kHz
         
+        # Generate time array
         t = np.linspace(0, self.duration, int(self.duration * sample_rate), endpoint=False)
         
+        # Generate analog signal based on selected wave type
         if wave_type == "正弦波":
             analog_signal = amplitude * np.sin(2 * np.pi * frequency * t)
-            signal_title = f"Sine Wave (Frequency: {frequency}KHz, Amplitude: {amplitude}V)"
+            signal_title = f"sin wave (Frequency: {frequency}KHz, Amplitude: {amplitude}V)"
+            
         elif wave_type == "方波":
             analog_signal = amplitude * (((t * frequency) % 1) < duty_cycle).astype(float)
-            analog_signal = analog_signal * 2 - amplitude
-            signal_title = f"Square Wave (Frequency: {frequency}KHz, Amplitude: {amplitude}V, Duty: {duty_cycle*100}%)"
+            analog_signal = analog_signal * 2 - amplitude  # Center around 0
+            signal_title = f"square wave (Frequency: {frequency}KHz, Amplitude: {amplitude}V, Duty: {duty_cycle*100}%)"
+            
         elif wave_type == "三角波":
             analog_signal = amplitude * 2 * np.abs(2 * ((t * frequency) % 1) - 1) - amplitude
-            signal_title = f"Triangle Wave (Frequency: {frequency}KHz, Amplitude: {amplitude}V)"
+            signal_title = f"Triangle wave (Frequency: {frequency}KHz, Amplitude: {amplitude}V)"
         
         self.input_canvas.plot_analog_signal(t, analog_signal, signal_title)
         
         digital_values = self.analog_to_digital_values(analog_signal, bits, ref_voltage)
         pwm_signal = self.digital_to_pwm(t, digital_values, bits, pwm_frequency)
         
-        output_title = f"Converted Wave ({bits}位量化, PWM频率: {pwm_frequency}Hz)"
+        # Plot PWM signal
+        output_title = f"Converted_Wave ({bits}位量化, PWM频率: {pwm_frequency}Hz)"
         self.output_canvas.plot_digital_signal(t, pwm_signal, output_title, bits)
         
         # Reconstruct analog signal from PWM
@@ -238,8 +245,14 @@ class ADConverterApp(QMainWindow):
         return digital_values
     
     def digital_to_pwm(self, t, digital_values, bits, pwm_frequency):
+        """将数字值转换为PWM信号"""
+        # Calculate the max digital value
         max_val = 2**bits - 1
+        
+        # Calculate PWM period in seconds
         pwm_period = 1.0 / pwm_frequency
+        
+        # Initialize PWM signal with zeros
         pwm_signal = np.zeros_like(t)
         for i, time in enumerate(t):
             position_in_period = (time % pwm_period) / pwm_period
