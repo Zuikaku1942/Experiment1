@@ -105,7 +105,7 @@ class ADConverterApp(QMainWindow):
         input_params_layout.addWidget(self.wave_type, 0, 1)
         
         # Frequency input
-        input_params_layout.addWidget(QLabel("频率 (Hz):"), 1, 0)
+        input_params_layout.addWidget(QLabel("频率 (kHz):"), 1, 0)
         self.frequency = QDoubleSpinBox()
         self.frequency.setRange(0.1, 1000.0)
         self.frequency.setValue(10.0)
@@ -115,7 +115,7 @@ class ADConverterApp(QMainWindow):
         # Amplitude input
         input_params_layout.addWidget(QLabel("幅值 (V):"), 2, 0)
         self.amplitude = QDoubleSpinBox()
-        self.amplitude.setRange(0.1, 10.0)
+        self.amplitude.setRange(0.1, 10.0)  # 将上限从原来的值改为10.0V
         self.amplitude.setValue(5.0)
         self.amplitude.valueChanged.connect(self.update_signal)
         input_params_layout.addWidget(self.amplitude, 2, 1)
