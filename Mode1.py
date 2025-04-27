@@ -8,8 +8,7 @@ from PyQt5.QtCore import Qt, QTimer
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from scipy.signal import lfilter
-#正文
+
 class SignalCanvas(FigureCanvas):
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
@@ -144,10 +143,11 @@ class ADConverterApp(QMainWindow):
         output_params_layout.addWidget(self.bits, 0, 1)
         
         # Sampling rate
-        output_params_layout.addWidget(QLabel("采样率 (Hz):"), 1, 0)
-        self.sample_rate = QSpinBox()
-        self.sample_rate.setRange(100, 10000)
-        self.sample_rate.setValue(1000)
+        output_params_layout.addWidget(QLabel("采样率 (kHz):"), 1, 0)
+        self.sample_rate = QDoubleSpinBox()
+        self.sample_rate.setRange(0.1, 5000.0)  # 修改上限为5000.0 kHz
+        self.sample_rate.setSingleStep(1.0)      # 增加步进值便于调节
+        self.sample_rate.setValue(1.0)
         self.sample_rate.valueChanged.connect(self.update_signal)
         output_params_layout.addWidget(self.sample_rate, 1, 1)
         
@@ -160,10 +160,11 @@ class ADConverterApp(QMainWindow):
         output_params_layout.addWidget(self.ref_voltage, 2, 1)
         
         # PWM frequency (new parameter)
-        output_params_layout.addWidget(QLabel("PWM频率 (Hz):"), 3, 0)
-        self.pwm_frequency = QSpinBox()
-        self.pwm_frequency.setRange(50, 5000)
-        self.pwm_frequency.setValue(500)
+        output_params_layout.addWidget(QLabel("PWM频率 (kHz):"), 3, 0)
+        self.pwm_frequency = QDoubleSpinBox()
+        self.pwm_frequency.setRange(0.05, 5.0)
+        self.pwm_frequency.setSingleStep(0.05)
+        self.pwm_frequency.setValue(0.5)
         self.pwm_frequency.valueChanged.connect(self.update_signal)
         output_params_layout.addWidget(self.pwm_frequency, 3, 1)
         
@@ -196,28 +197,28 @@ class ADConverterApp(QMainWindow):
         frequency = self.frequency.value()
         amplitude = self.amplitude.value()
         duty_cycle = self.duty_cycle.value() / 100  # Convert to fraction
-        sample_rate = self.sample_rate.value()
+        sample_rate = self.sample_rate.value()  # kHz
         bits_text = self.bits.currentText()
         bits = int(bits_text.replace("位", ""))
         ref_voltage = self.ref_voltage.value()
-        pwm_frequency = self.pwm_frequency.value()
+        pwm_frequency = self.pwm_frequency.value()  # kHz
         
-        # Generate time array
-        t = np.linspace(0, self.duration, int(self.duration * sample_rate), endpoint=False)
-        
-        # Generate analog signal based on selected wave type
+        # 生成时间轴，采样率为kHz，需乘1000
+        t = np.linspace(0, self.duration, int(self.duration * sample_rate * 1000), endpoint=False)
+
+        # 波形生成公式 frequency 直接用kHz
         if wave_type == "正弦波":
             analog_signal = amplitude * np.sin(2 * np.pi * frequency * t)
-            signal_title = f"sin wave (Frequency: {frequency}KHz, Amplitude: {amplitude}V)"
+            signal_title = f"sin wave (Frequency: {frequency}kHz, Amplitude: {amplitude}V)"
             
         elif wave_type == "方波":
             analog_signal = amplitude * (((t * frequency) % 1) < duty_cycle).astype(float)
             analog_signal = analog_signal * 2 - amplitude  # Center around 0
-            signal_title = f"square wave (Frequency: {frequency}KHz, Amplitude: {amplitude}V, Duty: {duty_cycle*100}%)"
+            signal_title = f"square wave (Frequency: {frequency}kHz, Amplitude: {amplitude}V, Duty: {duty_cycle*100}%)"
             
         elif wave_type == "三角波":
             analog_signal = amplitude * 2 * np.abs(2 * ((t * frequency) % 1) - 1) - amplitude
-            signal_title = f"Triangle wave (Frequency: {frequency}KHz, Amplitude: {amplitude}V)"
+            signal_title = f"Triangle wave (Frequency: {frequency}kHz, Amplitude: {amplitude}V)"
         
         # Plot analog signal
         self.input_canvas.plot_analog_signal(t, analog_signal, signal_title)
@@ -229,7 +230,7 @@ class ADConverterApp(QMainWindow):
         pwm_signal = self.digital_to_pwm(t, digital_values, bits, pwm_frequency)
         
         # Plot PWM signal
-        output_title = f"Converted_Wave ({bits}位量化, PWM频率: {pwm_frequency}Hz)"
+        output_title = f"Converted_Wave ({bits}位量化, PWM频率: {pwm_frequency}kHz)"
         self.output_canvas.plot_digital_signal(t, pwm_signal, output_title, bits)
         
         # Update monitoring display
@@ -259,13 +260,9 @@ class ADConverterApp(QMainWindow):
     
     def digital_to_pwm(self, t, digital_values, bits, pwm_frequency):
         """将数字值转换为PWM信号"""
-        # Calculate the max digital value
+        # pwm_frequency 单位为kHz
         max_val = 2**bits - 1
-        
-        # Calculate PWM period in seconds
-        pwm_period = 1.0 / pwm_frequency
-        
-        # Initialize PWM signal with zeros
+        pwm_period = 1.0 / (pwm_frequency * 1000)  # kHz转Hz
         pwm_signal = np.zeros_like(t)
         for i, time in enumerate(t):
             position_in_period = (time % pwm_period) / pwm_period
