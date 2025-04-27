@@ -1,22 +1,32 @@
 import sys
-import numpy as np
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
+import numpy as np  # 用于数值计算
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,  # Qt界面组件
                              QHBoxLayout, QLabel, QComboBox, QLineEdit, 
                              QPushButton, QGridLayout, QGroupBox, QDoubleSpinBox, 
                              QSpinBox, QSplitter)
-from PyQt5.QtCore import Qt, QTimer
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from PyQt5.QtCore import Qt, QTimer  # Qt核心功能
+import matplotlib.pyplot as plt  # 绘图库
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas  # Matplotlib的Qt后端
 from matplotlib.figure import Figure
-from scipy import signal as sg
+from scipy import signal as sg  # 信号处理库
 
 class SignalCanvas(FigureCanvas):
+    """信号显示画布类，用于显示波形
+    继承自FigureCanvas，提供了波形绘制功能"""
+    
     def __init__(self, parent=None, width=5, height=4, dpi=100):
+        """初始化画布
+        args:
+            parent: 父窗口
+            width: 画布宽度（英寸）
+            height: 画布高度（英寸）
+            dpi: 分辨率
+        """
         self.fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = self.fig.add_subplot(111)
+        self.axes = self.fig.add_subplot(111)  # 添加子图
         super(SignalCanvas, self).__init__(self.fig)
         self.setParent(parent)
-        self.fig.tight_layout()
+        self.fig.tight_layout()  # 自动调整布局
 
     def plot_analog_signal(self, t, signal, title):
         self.axes.clear()
