@@ -50,7 +50,7 @@ class SatelliteCommSimulator:
         
         title_label = tk.Label(
             title_frame, 
-            text="卫星移动通信简化版协议仿真系统", 
+            text="卫星移动通信仿真系统喵wwww", 
             font=("Arial", 18, "bold"),
             bg="#66ccff",
             fg="white"
@@ -95,7 +95,7 @@ class SatelliteCommSimulator:
         self.setup_modulation_tab(modulation_tab)
         
         # 创建状态栏
-        status_frame = tk.Frame(self.root, bg="#ff7f50", padx=10, pady=5)
+        status_frame = tk.Frame(self.root, bg="#ffffff", padx=10, pady=5)
         status_frame.pack(fill=tk.X, side=tk.BOTTOM)
         
         self.status_label = tk.Label(
@@ -110,7 +110,7 @@ class SatelliteCommSimulator:
         self.time_label = tk.Label(
             status_frame, 
             text=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            bg="#e0e0e0",
+            bg="#ffffff",
             anchor=tk.E
         )
         self.time_label.pack(side=tk.RIGHT)
@@ -190,7 +190,7 @@ class SatelliteCommSimulator:
         # 生成帧按钮
         generate_button = ttk.Button(
             button_frame, 
-            text="生成数据帧", 
+            text="生成数据帧喵", 
             command=self.generate_frame,
             style="TButton"
         )
@@ -199,7 +199,7 @@ class SatelliteCommSimulator:
         # 传输按钮
         transmit_button = ttk.Button(
             button_frame, 
-            text="传输", 
+            text="传输喵", 
             command=self.transmit_frame
         )
         transmit_button.pack(side=tk.LEFT, padx=5)
@@ -207,7 +207,7 @@ class SatelliteCommSimulator:
         # 清除按钮
         clear_button = ttk.Button(
             button_frame, 
-            text="清除", 
+            text="清除喵", 
             command=self.clear_generator
         )
         clear_button.pack(side=tk.LEFT, padx=5)
@@ -221,7 +221,7 @@ class SatelliteCommSimulator:
         self.frame_display.pack(fill=tk.BOTH, expand=True, pady=5)
         
         # 帧解析显示
-        frame_analysis_label = ttk.Label(output_frame, text="帧解析:")
+        frame_analysis_label = ttk.Label(output_frame, text="帧解析喵:")
         frame_analysis_label.pack(anchor=tk.W)
         
         self.frame_analysis = scrolledtext.ScrolledText(output_frame, height=10, wrap=tk.WORD)
@@ -229,11 +229,11 @@ class SatelliteCommSimulator:
         
     def setup_frame_analyzer(self, parent):
         # 创建输入框架
-        input_frame = ttk.LabelFrame(parent, text="帧解析器")
+        input_frame = ttk.LabelFrame(parent, text="帧解析器喵")
         input_frame.pack(fill=tk.X, padx=10, pady=10)
         
         # 帧输入
-        frame_label = ttk.Label(input_frame, text="输入16进制帧:")
+        frame_label = ttk.Label(input_frame, text="输入16进制帧喵:")
         frame_label.pack(anchor=tk.W, pady=5)
         
         self.frame_input = scrolledtext.ScrolledText(input_frame, height=4, wrap=tk.WORD)
@@ -246,7 +246,7 @@ class SatelliteCommSimulator:
         # 解析按钮
         analyze_button = ttk.Button(
             button_frame, 
-            text="解析帧", 
+            text="解析帧喵", 
             command=self.analyze_frame
         )
         analyze_button.pack(side=tk.LEFT, padx=5)
@@ -254,13 +254,13 @@ class SatelliteCommSimulator:
         # 清除按钮
         clear_button = ttk.Button(
             button_frame, 
-            text="清除", 
+            text="清除喵喵喵", 
             command=self.clear_analyzer
         )
         clear_button.pack(side=tk.LEFT, padx=5)
         
         # 创建输出框架
-        output_frame = ttk.LabelFrame(parent, text="解析结果")
+        output_frame = ttk.LabelFrame(parent, text="解析结果喵")
         output_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
         # 解析结果显示
@@ -269,7 +269,7 @@ class SatelliteCommSimulator:
         
     def setup_monitor_tab(self, parent):
         # 创建监控日志框架
-        monitor_frame = ttk.LabelFrame(parent, text="通信监控日志")
+        monitor_frame = ttk.LabelFrame(parent, text="通信监控日志喵")
         monitor_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
         # 监控日志显示
@@ -283,7 +283,7 @@ class SatelliteCommSimulator:
         # 清除日志按钮
         clear_log_button = ttk.Button(
             button_frame, 
-            text="清除日志", 
+            text="清除日志喵呜", 
             command=self.clear_monitor_log
         )
         clear_log_button.pack(side=tk.LEFT, padx=5)
@@ -291,56 +291,92 @@ class SatelliteCommSimulator:
         # 导出日志按钮
         export_log_button = ttk.Button(
             button_frame, 
-            text="导出日志", 
+            text="导出日志呜", 
             command=self.export_log
         )
         export_log_button.pack(side=tk.LEFT, padx=5)
     
     def setup_modulation_tab(self, parent):
         """设置调制解调选项卡"""
-        # 创建调制部分框架
-        modulation_frame = ttk.LabelFrame(parent, text="BPSK调制")
-        modulation_frame.pack(fill=tk.X, padx=10, pady=10)
+        # 创建左侧调制部分框架
+        left_frame = ttk.Frame(parent)
+        left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
         
-        # 十六进制输入
-        hex_label = ttk.Label(modulation_frame, text="16进制输入:")
+        # 创建右侧解调部分框架 
+        right_frame = ttk.Frame(parent)
+        right_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
+        
+        # 调制部分
+        modulation_frame = ttk.LabelFrame(left_frame, text="BPSK调制喵")
+        modulation_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        # [原有调制部分代码保持不变]
+        hex_label = ttk.Label(modulation_frame, text="16进制输入喵:")
         hex_label.pack(anchor=tk.W, pady=5)
         
         self.hex_input = scrolledtext.ScrolledText(modulation_frame, height=3, wrap=tk.WORD)
         self.hex_input.pack(fill=tk.X, pady=5)
         
-        # 二进制显示
-        bin_label = ttk.Label(modulation_frame, text="二进制序列:")
+        bin_label = ttk.Label(modulation_frame, text="二进制序列喵:")
         bin_label.pack(anchor=tk.W, pady=5)
         
         self.bin_display = scrolledtext.ScrolledText(modulation_frame, height=3, wrap=tk.WORD)
         self.bin_display.pack(fill=tk.X, pady=5)
         
-        # 按钮框架
-        button_frame = tk.Frame(modulation_frame, bg="#f5f5f5")
-        button_frame.pack(fill=tk.X, pady=10)
+        mod_button_frame = tk.Frame(modulation_frame, bg="#f5f5f5")
+        mod_button_frame.pack(fill=tk.X, pady=10)
         
-        # 调制按钮
         modulate_button = ttk.Button(
-            button_frame,
-            text="BPSK调制",
+            mod_button_frame,
+            text="BPSK调制喵",
             command=self.perform_modulation
         )
         modulate_button.pack(side=tk.LEFT, padx=5)
         
-        # 清除按钮
-        clear_button = ttk.Button(
-            button_frame,
-            text="清除",
+        clear_mod_button = ttk.Button(
+            mod_button_frame,
+            text="清除喵",
             command=self.clear_modulation
         )
-        clear_button.pack(side=tk.LEFT, padx=5)
+        clear_mod_button.pack(side=tk.LEFT, padx=5)
         
-        # 调制波形显示框架
-        wave_frame = ttk.LabelFrame(parent, text="调制波形")
+        # 解调部分
+        demodulation_frame = ttk.LabelFrame(right_frame, text="BPSK解调喵")
+        demodulation_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        bin_input_label = ttk.Label(demodulation_frame, text="二进制输入喵:")
+        bin_input_label.pack(anchor=tk.W, pady=5)
+        
+        self.bin_input = scrolledtext.ScrolledText(demodulation_frame, height=3, wrap=tk.WORD)
+        self.bin_input.pack(fill=tk.X, pady=5)
+        
+        hex_output_label = ttk.Label(demodulation_frame, text="16进制输出喵:")
+        hex_output_label.pack(anchor=tk.W, pady=5)
+        
+        self.hex_output = scrolledtext.ScrolledText(demodulation_frame, height=3, wrap=tk.WORD)
+        self.hex_output.pack(fill=tk.X, pady=5)
+        
+        demod_button_frame = tk.Frame(demodulation_frame, bg="#f5f5f5")
+        demod_button_frame.pack(fill=tk.X, pady=10)
+        
+        demodulate_button = ttk.Button(
+            demod_button_frame,
+            text="BPSK解调喵",
+            command=self.perform_demodulation
+        )
+        demodulate_button.pack(side=tk.LEFT, padx=5)
+        
+        clear_demod_button = ttk.Button(
+            demod_button_frame,
+            text="清除喵",
+            command=self.clear_demodulation
+        )
+        clear_demod_button.pack(side=tk.LEFT, padx=5)
+        
+        # 波形显示区域
+        wave_frame = ttk.LabelFrame(parent, text="调制/解调波形")
         wave_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
-        # 波形图显示区域
         self.wave_canvas = tk.Canvas(wave_frame, bg="white", height=200)
         self.wave_canvas.pack(fill=tk.BOTH, expand=True, pady=5)
 
@@ -700,6 +736,60 @@ class SatelliteCommSimulator:
         """清除调制部分的所有内容"""
         self.hex_input.delete(1.0, tk.END)
         self.bin_display.delete(1.0, tk.END)
+        self.wave_canvas.delete("all")
+        self.status_label.config(text="就绪")
+
+    def binary_to_hex(self, binary_string):
+        """将二进制字符串转换为16进制字符串"""
+        try:
+            # 确保二进制字符串长度是4的倍数
+            padding = len(binary_string) % 4
+            if padding:
+                binary_string = '0' * (4 - padding) + binary_string
+                
+            # 每4位二进制转换为1位16进制
+            hex_string = hex(int(binary_string, 2))[2:]
+            
+            # 确保输出是偶数长度
+            if len(hex_string) % 2:
+                hex_string = '0' + hex_string
+                
+            return hex_string.upper()
+        except ValueError:
+            return None
+
+    def perform_demodulation(self):
+        """执行BPSK解调"""
+        binary_input = self.bin_input.get(1.0, tk.END).strip()
+        if not binary_input:
+            messagebox.showwarning("输入错误", "请输入二进制数据")
+            return
+        
+        # 验证输入是否为有效的二进制串
+        if not all(bit in '01' for bit in binary_input):
+            messagebox.showerror("错误", "输入必须只包含0和1")
+            return
+        
+        # 转换为16进制
+        hex_result = self.binary_to_hex(binary_input)
+        if hex_result is None:
+            messagebox.showerror("错误", "二进制转换失败")
+            return
+        
+        # 显示16进制结果
+        self.hex_output.delete(1.0, tk.END)
+        self.hex_output.insert(tk.END, hex_result)
+        
+        # 绘制波形 (使用相同的波形绘制函数)
+        self.draw_bpsk_waveform(binary_input)
+        
+        # 更新状态栏
+        self.status_label.config(text=f"BPSK解调完成 - 数据长度: {len(binary_input)}比特")
+
+    def clear_demodulation(self):
+        """清除解调部分的所有内容"""
+        self.bin_input.delete(1.0, tk.END)
+        self.hex_output.delete(1.0, tk.END)
         self.wave_canvas.delete("all")
         self.status_label.config(text="就绪")
 
