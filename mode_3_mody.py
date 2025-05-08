@@ -8,7 +8,7 @@ import time
 class SatelliteCommSimulator:
     def __init__(self, root):
         self.root = root
-        self.root.title("卫星移动通信简化版协议 - 增强版")
+        self.root.title("卫星移动通信简化版协议 - 超级无敌版")
         self.root.geometry("900x700")
         self.root.configure(bg="#ffffff")  # 背景改为白色
         
@@ -44,20 +44,20 @@ class SatelliteCommSimulator:
         
     def create_widgets(self):
         # 创建标题框架
-        title_frame = tk.Frame(self.root, bg="#3a7ebf", padx=10, pady=10)
+        title_frame = tk.Frame(self.root, bg="#66ccff", padx=10, pady=10)
         title_frame.pack(fill=tk.X)
         
         title_label = tk.Label(
             title_frame, 
             text="卫星移动通信简化版协议仿真系统", 
             font=("Arial", 18, "bold"),
-            bg="#3a7ebf",
+            bg="#66ccff",
             fg="white"
         )
         title_label.pack()
         
         # 创建主框架
-        main_frame = tk.Frame(self.root, bg="#f5f5f5", padx=20, pady=15)
+        main_frame = tk.Frame(self.root, bg="#ffffff", padx=20, pady=15)
         main_frame.pack(fill=tk.BOTH, expand=True)
         
         # 创建选项卡
@@ -87,7 +87,7 @@ class SatelliteCommSimulator:
         self.setup_monitor_tab(monitor_tab)
         
         # 创建状态栏
-        status_frame = tk.Frame(self.root, bg="#e0e0e0", padx=10, pady=5)
+        status_frame = tk.Frame(self.root, bg="#ff7f50", padx=10, pady=5)
         status_frame.pack(fill=tk.X, side=tk.BOTTOM)
         
         self.status_label = tk.Label(
@@ -121,7 +121,7 @@ class SatelliteCommSimulator:
         
         self.payload_entry = ttk.Entry(input_frame, width=50)
         self.payload_entry.grid(row=0, column=1, sticky=tk.W, pady=5)
-        self.payload_entry.insert(0, "Hello Satellite")
+        self.payload_entry.insert(0, "wa ta shi wa MIKUMA  desu")
         
         # 源地址选择
         src_addr_label = ttk.Label(input_frame, text="源地址:")
@@ -269,7 +269,7 @@ class SatelliteCommSimulator:
         self.monitor_log.pack(fill=tk.BOTH, expand=True, pady=5)
         
         # 按钮框架
-        button_frame = tk.Frame(parent, bg="#f5f5f5")
+        button_frame = tk.Frame(parent, bg="#ffffff")
         button_frame.pack(fill=tk.X, padx=10, pady=10)
         
         # 清除日志按钮
