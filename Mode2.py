@@ -82,7 +82,7 @@ def monitor(tag, data):
 class SatelliteEncodingApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Satellite Mobile Terminal Digital Signal Encoding Subsystem")
+        self.root.title("A Mikuma Satellite  Encoding Subsystem")
         self.root.geometry("800x700")
         self.root.configure(bg="#f0f0f0")
         
@@ -116,7 +116,7 @@ class SatelliteEncodingApp:
         # Title
         title_label = tk.Label(
             main_frame, 
-            text="Satellite Mobile Terminal Digital Signal Encoding Subsystem",
+            text="A Mikuma Satellite Digital Signal Encoding Subsystem",
             font=("Arial", 16, "bold"),
             bg="#f0f0f0",
             fg="#2c3e50"
@@ -209,10 +209,9 @@ class SatelliteEncodingApp:
         info_frame.pack(fill="x", pady=5)
         
         info_text = """This module implements a simplified Turbo encoder for a satellite mobile terminal communication system. It includes:
-- Random 16-bit data generation
-- Turbo encoding with interleaving and dual RSC encoders
-- Monitoring capabilities with timestamp tracking
-- Clear input/output interfaces for integration with other subsystems"""
+- By Mikuma
+wo kao zhege zhende you dian fan er qie haonan woqu xiang tui xue le wo qu 
+"""
         
         info_label = tk.Label(
             info_frame,
