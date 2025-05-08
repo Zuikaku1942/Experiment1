@@ -86,7 +86,8 @@ class ADConverterApp(QMainWindow):
         self.update_signal()
 
     def initUI(self):
-        self.setWindowTitle('卫星通信仿真系统 - AD转换模块')
+        # Window title
+        self.setWindowTitle('Satellite Communication Simulation - ADC Module')
         self.setGeometry(100, 100, 1600, 700)  # 扩大窗口宽度以容纳三个图表
         
         # Main layout with splitter
@@ -124,20 +125,20 @@ class ADConverterApp(QMainWindow):
         right_layout.addWidget(self.reconstructed_canvas)
         
         # Input parameters group
-        input_group = QGroupBox("输入波形参数")
+        input_group = QGroupBox("Input Parameters")
         input_params_layout = QGridLayout()
         input_group.setLayout(input_params_layout)
         left_layout.addWidget(input_group)
         
         # Wave type selector
-        input_params_layout.addWidget(QLabel("波形类型:"), 0, 0)
+        input_params_layout.addWidget(QLabel("Wave Type:"), 0, 0)
         self.wave_type = QComboBox()
-        self.wave_type.addItems(["正弦波", "方波", "三角波"])
+        self.wave_type.addItems(["Sine", "Square", "Triangle"])
         self.wave_type.currentIndexChanged.connect(self.on_wave_type_changed)
         input_params_layout.addWidget(self.wave_type, 0, 1)
         
         # Frequency input
-        input_params_layout.addWidget(QLabel("频率 (kHz):"), 1, 0)
+        input_params_layout.addWidget(QLabel("Freq (kHz):"), 1, 0)
         self.frequency = QDoubleSpinBox()
         self.frequency.setRange(0.1, 1000.0)
         self.frequency.setValue(10.0)
@@ -145,7 +146,7 @@ class ADConverterApp(QMainWindow):
         input_params_layout.addWidget(self.frequency, 1, 1)
         
         # Amplitude input
-        input_params_layout.addWidget(QLabel("幅值 (V):"), 2, 0)
+        input_params_layout.addWidget(QLabel("Amp (V):"), 2, 0)
         self.amplitude = QDoubleSpinBox()
         self.amplitude.setRange(0.1, 10.0)  # 将上限从原来的值改为10.0V
         self.amplitude.setValue(5.0)
@@ -153,7 +154,7 @@ class ADConverterApp(QMainWindow):
         input_params_layout.addWidget(self.amplitude, 2, 1)
         
         # Duty cycle input (only for square wave)
-        input_params_layout.addWidget(QLabel("占空比 (%):"), 3, 0)
+        input_params_layout.addWidget(QLabel("Duty (%):"), 3, 0)
         self.duty_cycle = QDoubleSpinBox()
         self.duty_cycle.setRange(1.0, 99.0)
         self.duty_cycle.setValue(50.0)
@@ -161,21 +162,21 @@ class ADConverterApp(QMainWindow):
         input_params_layout.addWidget(self.duty_cycle, 3, 1)
         
         # AD conversion parameters group
-        output_group = QGroupBox("AD转换参数")
+        output_group = QGroupBox("ADC Parameters")
         output_params_layout = QGridLayout()
         output_group.setLayout(output_params_layout)
         middle_layout.addWidget(output_group)
         
         # Bits selector
-        output_params_layout.addWidget(QLabel("量化位数:"), 0, 0)
+        output_params_layout.addWidget(QLabel("Bits:"), 0, 0)
         self.bits = QComboBox()
-        self.bits.addItems(["8位", "10位", "12位", "16位"])
+        self.bits.addItems(["8bit", "10bit", "12bit", "16bit"])
         self.bits.setCurrentIndex(0)  # Default to 8 bits
         self.bits.currentIndexChanged.connect(self.update_signal)
         output_params_layout.addWidget(self.bits, 0, 1)
         
         # Sampling rate
-        output_params_layout.addWidget(QLabel("采样率 (kHz):"), 1, 0)
+        output_params_layout.addWidget(QLabel("Sample Rate (kHz):"), 1, 0)
         self.sample_rate = QDoubleSpinBox()
         self.sample_rate.setRange(0.1, 5000.0)  # 修改上限为5000.0 kHz
         self.sample_rate.setSingleStep(1.0)      # 增加步进值便于调节
@@ -184,7 +185,7 @@ class ADConverterApp(QMainWindow):
         output_params_layout.addWidget(self.sample_rate, 1, 1)
         
         # Reference voltage
-        output_params_layout.addWidget(QLabel("参考电压 (V):"), 2, 0)
+        output_params_layout.addWidget(QLabel("Ref Voltage (V):"), 2, 0)
         self.ref_voltage = QDoubleSpinBox()
         self.ref_voltage.setRange(1.0, 20.0)
         self.ref_voltage.setValue(5.0)
@@ -192,7 +193,7 @@ class ADConverterApp(QMainWindow):
         output_params_layout.addWidget(self.ref_voltage, 2, 1)
         
         # PWM frequency
-        output_params_layout.addWidget(QLabel("PWM频率 (kHz):"), 3, 0)
+        output_params_layout.addWidget(QLabel("PWM Freq (kHz):"), 3, 0)
         self.pwm_frequency = QDoubleSpinBox()
         self.pwm_frequency.setRange(0.05, 5.0)
         self.pwm_frequency.setSingleStep(0.05)
@@ -201,18 +202,18 @@ class ADConverterApp(QMainWindow):
         output_params_layout.addWidget(self.pwm_frequency, 3, 1)
         
         # Monitoring display
-        output_params_layout.addWidget(QLabel("监测点:"), 4, 0)
+        output_params_layout.addWidget(QLabel("Monitor:"), 4, 0)
         self.monitor = QLabel("采样点: 0, 数字值: 0")
         output_params_layout.addWidget(self.monitor, 4, 1)
         
         # DA conversion parameters group
-        reconst_group = QGroupBox("DA转换参数")
+        reconst_group = QGroupBox("DAC Parameters")
         reconst_params_layout = QGridLayout()
         reconst_group.setLayout(reconst_params_layout)
         right_layout.addWidget(reconst_group)
         
         # Low-pass filter cutoff frequency
-        reconst_params_layout.addWidget(QLabel("低通滤波器截止频率 (kHz):"), 0, 0)
+        reconst_params_layout.addWidget(QLabel("LPF Cutoff (kHz):"), 0, 0)
         self.cutoff_freq = QDoubleSpinBox()
         self.cutoff_freq.setRange(0.1, 100.0)
         self.cutoff_freq.setSingleStep(0.1)  # 将步进值从默认的1.0改为0.1
@@ -221,7 +222,7 @@ class ADConverterApp(QMainWindow):
         reconst_params_layout.addWidget(self.cutoff_freq, 0, 1)
         
         # Filter order
-        reconst_params_layout.addWidget(QLabel("滤波器阶数:"), 1, 0)
+        reconst_params_layout.addWidget(QLabel("Filter Order:"), 1, 0)
         self.filter_order = QSpinBox()
         self.filter_order.setRange(1, 8)
         self.filter_order.setValue(4)
@@ -229,42 +230,42 @@ class ADConverterApp(QMainWindow):
         reconst_params_layout.addWidget(self.filter_order, 1, 1)
         
         # Filter type
-        reconst_params_layout.addWidget(QLabel("滤波器类型:"), 2, 0)
+        reconst_params_layout.addWidget(QLabel("Filter Type:"), 2, 0)
         self.filter_type = QComboBox()
-        self.filter_type.addItems(["移动平均", "巴特沃斯"])
+        self.filter_type.addItems(["Moving Avg", "Butterworth"])
         self.filter_type.setCurrentIndex(0)
         self.filter_type.currentIndexChanged.connect(self.update_signal)
         reconst_params_layout.addWidget(self.filter_type, 2, 1)
         
         # Show original signal option
-        reconst_params_layout.addWidget(QLabel("显示原始信号对比:"), 3, 0)
+        reconst_params_layout.addWidget(QLabel("Show Original:"), 3, 0)
         self.show_original = QComboBox()
-        self.show_original.addItems(["是", "否"])
+        self.show_original.addItems(["Yes", "No"])
         self.show_original.setCurrentIndex(0)
         self.show_original.currentIndexChanged.connect(self.update_signal)
         reconst_params_layout.addWidget(self.show_original, 3, 1)
         
         # Reconstructed signal monitoring
-        reconst_params_layout.addWidget(QLabel("转换质量:"), 4, 0)
-        self.recon_monitor = QLabel("误差: 0 V, 信噪比: 0 dB")
+        reconst_params_layout.addWidget(QLabel("Quality:"), 4, 0)
+        self.recon_monitor = QLabel("Error: 0V, SNR: 0dB")
         reconst_params_layout.addWidget(self.recon_monitor, 4, 1)
         
         # Control buttons
         control_layout = QHBoxLayout()
         main_layout.addLayout(control_layout)
         
-        self.start_button = QPushButton("开始模拟")
+        self.start_button = QPushButton("Start")
         self.start_button.clicked.connect(self.toggle_simulation)
         control_layout.addWidget(self.start_button)
         
-        self.reset_button = QPushButton("重置")
+        self.reset_button = QPushButton("Reset")
         self.reset_button.clicked.connect(self.reset_simulation)
         control_layout.addWidget(self.reset_button)
         
     def on_wave_type_changed(self):
         # Enable/disable duty cycle based on wave type
         wave_type = self.wave_type.currentText()
-        self.duty_cycle.setEnabled(wave_type == "方波")
+        self.duty_cycle.setEnabled(wave_type == "Square")
         self.update_signal()
         
     def update_signal(self):
@@ -276,28 +277,28 @@ class ADConverterApp(QMainWindow):
             duty_cycle = self.duty_cycle.value() / 100  # Convert to fraction
             sample_rate = self.sample_rate.value()  # kHz
             bits_text = self.bits.currentText()
-            bits = int(bits_text.replace("位", ""))
+            bits = int(bits_text.replace("bit", ""))
             ref_voltage = self.ref_voltage.value()
             pwm_frequency = self.pwm_frequency.value()  # kHz
             cutoff_freq = self.cutoff_freq.value()  # kHz
             filter_order = self.filter_order.value()
             filter_type = self.filter_type.currentText()
-            show_original = self.show_original.currentText() == "是"
+            show_original = self.show_original.currentText() == "Yes"
             
             # 生成时间轴，采样率为kHz，需乘1000
             t = np.linspace(0, self.duration, int(self.duration * sample_rate * 1000), endpoint=False)
 
             # 波形生成公式 frequency 直接用kHz
-            if wave_type == "正弦波":
+            if wave_type == "Sine":
                 analog_signal = amplitude * np.sin(2 * np.pi * frequency * t)
                 signal_title = f"sin wave (Frequency: {frequency}kHz, Amplitude: {amplitude}V)"
                 
-            elif wave_type == "方波":
+            elif wave_type == "Square":
                 analog_signal = amplitude * (((t * frequency) % 1) < duty_cycle).astype(float)
                 analog_signal = analog_signal * 2 - amplitude  # Center around 0
                 signal_title = f"square wave (Frequency: {frequency}kHz, Amplitude: {amplitude}V, Duty: {duty_cycle*100}%)"
                 
-            elif wave_type == "三角波":
+            elif wave_type == "Triangle":
                 analog_signal = amplitude * 2 * np.abs(2 * ((t * frequency) % 1) - 1) - amplitude
                 signal_title = f"Triangle wave (Frequency: {frequency}kHz, Amplitude: {amplitude}V)"
             
@@ -311,7 +312,7 @@ class ADConverterApp(QMainWindow):
             pwm_signal = self.digital_to_pwm(t, digital_values, bits, pwm_frequency)
             
             # Plot PWM signal
-            output_title = f"Converted_Wave ({bits}位量化, PWM频率: {pwm_frequency}kHz)"
+            output_title = f"Converted_Wave ({bits}bit量化, PWM频率: {pwm_frequency}kHz)"
             self.output_canvas.plot_digital_signal(t, pwm_signal, output_title, bits)
             
             # Convert PWM signal back to analog
@@ -324,7 +325,7 @@ class ADConverterApp(QMainWindow):
                     snr = 10 * np.log10(np.sum(analog_signal ** 2) / np.sum((analog_signal - reconstructed_signal) ** 2))
                 else:
                     snr = 0
-                self.recon_monitor.setText(f"误差: {rmse:.3f} V, 信噪比: {snr:.2f} dB")
+                self.recon_monitor.setText(f"Error: {rmse:.3f} V, SNR: {snr:.2f} dB")
             
             # Plot reconstructed signal
             recon_title = f"Reconstructed Wave (滤波器截止: {cutoff_freq}kHz, 类型: {filter_type})"
@@ -337,8 +338,8 @@ class ADConverterApp(QMainWindow):
                 digital_value = digital_values[midpoint_idx]
                 max_val = 2**bits - 1
                 duty_cycle_percentage = (digital_value / max_val) * 100
-                self.monitor.setText(f"采样点: {t[midpoint_idx]:.4f}s, 模拟值: {analog_signal[midpoint_idx]:.2f}V, "
-                                   f"数字值: {int(digital_value)}, PWM占空比: {duty_cycle_percentage:.1f}%")
+                self.monitor.setText(f"T: {t[midpoint_idx]:.4f}s, V: {analog_signal[midpoint_idx]:.2f}V, "
+                                   f"D: {int(digital_value)}, PWM: {duty_cycle_percentage:.1f}%")
         except Exception as e:
             print(f"错误: {e}")
             # 在遇到错误时仍然保持基本UI功能
@@ -382,7 +383,7 @@ class ADConverterApp(QMainWindow):
             
         fs = 1.0 / (t[1] - t[0])  # 采样频率
 
-        if filter_type == "移动平均":
+        if filter_type == "Moving Avg":
             # 使用移动平均滤波
             window_size = max(1, int((1.0 / (cutoff_freq * 1000)) * fs))
             kernel = np.ones(window_size) / window_size
@@ -414,11 +415,11 @@ class ADConverterApp(QMainWindow):
     def toggle_simulation(self):
         if self.is_running:
             self.timer.stop()
-            self.start_button.setText("开始模拟")
+            self.start_button.setText("Start")
             self.is_running = False
         else:
             self.timer.start(50)  # Update every 50ms
-            self.start_button.setText("暂停模拟")
+            self.start_button.setText("Pause")
             self.is_running = True
     
     def reset_simulation(self):
