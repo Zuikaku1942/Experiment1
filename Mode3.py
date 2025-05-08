@@ -12,6 +12,17 @@ class SatelliteCommSimulator:
         self.root.title("卫星移动通信简化版协议 - 超级无敌版")
         self.root.geometry("900x700")
         self.root.configure(bg="#ffffff")  # 背景改为白色
+
+        # 定义传输常量
+        self.CHANNEL_COUNT = 4  # 信道数量
+        self.DELAY_ONE_HOP = (0.5, 1.0)  # 一跳延迟范围(秒)
+        self.DELAY_TWO_HOP = (1.0, 2.0)  # 两跳延迟范围(秒)
+
+        # 信道状态
+        self.channels = [{"busy": False, "current_task": None} for _ in range(self.CHANNEL_COUNT)]
+
+        # 传输历史
+        self.routing_history = []
         
         # 定义协议常量
         self.FRAME_HEADER = "6d656f77"  # "meow" 的16进制
@@ -44,6 +55,7 @@ class SatelliteCommSimulator:
         self.create_widgets()
         
     def create_widgets(self):
+        """创建GUI组件"""
         # 创建标题框架
         title_frame = tk.Frame(self.root, bg="#66ccff", padx=10, pady=10)
         title_frame.pack(fill=tk.X)
@@ -64,6 +76,11 @@ class SatelliteCommSimulator:
         # 创建选项卡
         tab_control = ttk.Notebook(main_frame)
         
+        # 创建传输交换选项卡
+        routing_tab = ttk.Frame(tab_control)
+        tab_control.add(routing_tab, text="传输交换")
+        self.setup_routing_tab(routing_tab)
+        
         # 创建帧生成器选项卡
         frame_generator_tab = ttk.Frame(tab_control)
         tab_control.add(frame_generator_tab, text="帧生成器")
@@ -82,16 +99,10 @@ class SatelliteCommSimulator:
 
         tab_control.pack(expand=True, fill=tk.BOTH)
         
-        # 帧生成器选项卡内容
+        # 设置各个选项卡的内容
         self.setup_frame_generator(frame_generator_tab)
-        
-        # 帧分析器选项卡内容
         self.setup_frame_analyzer(frame_analyzer_tab)
-        
-        # 监控日志选项卡内容
         self.setup_monitor_tab(monitor_tab)
-        
-        # 调制解调选项卡内容
         self.setup_modulation_tab(modulation_tab)
         
         # 创建状态栏
@@ -101,7 +112,7 @@ class SatelliteCommSimulator:
         self.status_label = tk.Label(
             status_frame, 
             text="就绪 - 系统初始化完成",
-            bg="#e0e0e0",
+            bg="#ffffff",
             anchor=tk.W
         )
         self.status_label.pack(side=tk.LEFT)
@@ -792,6 +803,224 @@ class SatelliteCommSimulator:
         self.hex_output.delete(1.0, tk.END)
         self.wave_canvas.delete("all")
         self.status_label.config(text="就绪")
+
+    def setup_routing_tab(self, parent):
+        """设置传输交换选项卡"""
+        # 左侧：传输配置
+        left_frame = ttk.LabelFrame(parent, text="传输配置")
+        left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # 数据帧输入
+        frame_label = ttk.Label(left_frame, text="数据帧 (16进制):")
+        frame_label.pack(anchor=tk.W, pady=5, padx=5)
+        
+        self.routing_frame_input = scrolledtext.ScrolledText(left_frame, height=4, wrap=tk.WORD)
+        self.routing_frame_input.pack(fill=tk.X, padx=5, pady=5)
+        
+        # 传输模式选择
+        mode_frame = ttk.LabelFrame(left_frame, text="传输模式")
+        mode_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        self.routing_mode = tk.StringVar(value="one_hop")
+        ttk.Radiobutton(mode_frame, text="星上交换(一跳)", 
+                        variable=self.routing_mode, value="one_hop").pack(anchor=tk.W, padx=5, pady=2)
+        ttk.Radiobutton(mode_frame, text="星地交换(两跳)", 
+                        variable=self.routing_mode, value="two_hop").pack(anchor=tk.W, padx=5, pady=2)
+        
+        # 高级选项
+        options_frame = ttk.LabelFrame(left_frame, text="高级选项")
+        options_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        self.auto_channel_var = tk.BooleanVar(value=True)
+        ttk.Checkbutton(options_frame, text="自动选择信道", 
+                        variable=self.auto_channel_var).pack(anchor=tk.W, padx=5, pady=2)
+        
+        channel_frame = tk.Frame(options_frame)
+        channel_frame.pack(fill=tk.X, padx=5, pady=2)
+        
+        ttk.Label(channel_frame, text="手动信道选择:").pack(side=tk.LEFT)
+        self.channel_var = tk.StringVar(value="0")
+        channel_combo = ttk.Combobox(channel_frame, textvariable=self.channel_var, 
+                                    values=list(range(self.CHANNEL_COUNT)), width=5)
+        channel_combo.pack(side=tk.LEFT, padx=5)
+        
+        # 控制按钮
+        button_frame = tk.Frame(left_frame)
+        button_frame.pack(fill=tk.X, pady=10, padx=5)
+        
+        ttk.Button(button_frame, text="开始传输", 
+                   command=self.start_routing).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="清除", 
+                   command=self.clear_routing).pack(side=tk.LEFT, padx=5)
+        
+        # 右侧：状态监控
+        right_frame = ttk.Frame(parent)
+        right_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # 信道状态
+        channel_status_frame = ttk.LabelFrame(right_frame, text="信道状态")
+        channel_status_frame.pack(fill=tk.X, pady=5)
+        
+        self.channel_status_labels = []
+        for i in range(self.CHANNEL_COUNT):
+            status_frame = tk.Frame(channel_status_frame)
+            status_frame.pack(fill=tk.X, padx=5, pady=2)
+            
+            ttk.Label(status_frame, text=f"信道 {i}:").pack(side=tk.LEFT)
+            status_label = ttk.Label(status_frame, text="空闲")
+            status_label.pack(side=tk.LEFT, padx=5)
+            self.channel_status_labels.append(status_label)
+        
+        # 传输过程监控
+        monitor_frame = ttk.LabelFrame(right_frame, text="传输过程监控")
+        monitor_frame.pack(fill=tk.BOTH, expand=True, pady=5)
+        
+        self.routing_monitor = scrolledtext.ScrolledText(monitor_frame, wrap=tk.WORD)
+        self.routing_monitor.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+    def start_routing(self):
+        """开始传输处理"""
+        # 获取输入帧
+        frame = self.routing_frame_input.get(1.0, tk.END).strip()
+        if not frame:
+            messagebox.showwarning("错误", "请输入数据帧")
+            return
+        
+        # 验证帧格式
+        if not frame.startswith(self.FRAME_HEADER) or not frame.endswith(self.FRAME_FOOTER):
+            messagebox.showwarning("错误", "无效的帧格式")
+            return
+        
+        # 获取传输模式
+        is_one_hop = self.routing_mode.get() == "one_hop"
+        
+        # 选择信道
+        if self.auto_channel_var.get():
+            channel = self._find_available_channel()
+            if channel is None:
+                messagebox.showwarning("错误", "没有可用信道")
+                return
+        else:
+            channel = int(self.channel_var.get())
+            if self.channels[channel]["busy"]:
+                messagebox.showwarning("错误", "所选信道正在使用中")
+                return
+        
+        # 开始传输过程
+        self._process_transmission(frame, channel, is_one_hop)
+
+    def _find_available_channel(self):
+        """查找可用信道"""
+        for i, channel in enumerate(self.channels):
+            if not channel["busy"]:
+                return i
+        return None
+
+    def _process_transmission(self, frame, channel, is_one_hop):
+        """处理传输过程"""
+        # 提取源地址和目标地址
+        content = frame[len(self.FRAME_HEADER):-len(self.FRAME_FOOTER)]
+        src_addr = content[:4]
+        dest_addr = content[4:8]
+        
+        # 查找地址名称
+        src_name = next((name for name, addr in self.ADDRESSES.items() if addr == src_addr), "未知")
+        dest_name = next((name for name, addr in self.ADDRESSES.items() if addr == dest_addr), "未知")
+        
+        # 更新信道状态
+        self.channels[channel]["busy"] = True
+        self.channels[channel]["current_task"] = f"{src_name} -> {dest_name}"
+        self._update_channel_status(channel)
+        
+        # 记录开始时间
+        start_time = datetime.datetime.now()
+        
+        # 添加传输日志
+        self._add_routing_log(f"[{start_time.strftime('%H:%M:%S.%f')[:-3]}] "
+                             f"开始传输 - 使用信道 {channel}")
+        self._add_routing_log(f"源地址: {src_name}")
+        self._add_routing_log(f"目标地址: {dest_name}")
+        self._add_routing_log(f"传输模式: {'一跳' if is_one_hop else '两跳'}")
+        
+        # 模拟传输过程
+        self.root.after(100, lambda: self._simulate_transmission(channel, is_one_hop, start_time))
+
+    def _simulate_transmission(self, channel, is_one_hop, start_time):
+        """模拟传输过程"""
+        if is_one_hop:
+            delay = random.uniform(*self.DELAY_ONE_HOP)
+            steps = [
+                ("卫星接收数据", 0.3),
+                ("星上交换处理", 0.4),
+                ("卫星发送数据", 0.3)
+            ]
+        else:
+            delay = random.uniform(*self.DELAY_TWO_HOP)
+            steps = [
+                ("卫星接收数据", 0.2),
+                ("转发至地面站", 0.2),
+                ("地面站处理", 0.2),
+                ("发送至卫星", 0.2),
+                ("卫星转发数据", 0.2)
+            ]
+        
+        total_steps = len(steps)
+        for i, (step, weight) in enumerate(steps, 1):
+            step_delay = delay * weight
+            self.root.after(
+                int(step_delay * 1000), 
+                lambda s=step, p=i/total_steps: self._update_transmission_status(s, p)
+            )
+        
+        # 传输完成处理
+        self.root.after(
+            int(delay * 1000),
+            lambda: self._complete_transmission(channel, start_time)
+        )
+
+    def _update_transmission_status(self, step, progress):
+        """更新传输状态"""
+        self._add_routing_log(f"- {step} ({int(progress * 100)}%)")
+
+    def _complete_transmission(self, channel, start_time):
+        """完成传输处理"""
+        # 计算传输时间
+        end_time = datetime.datetime.now()
+        duration = (end_time - start_time).total_seconds()
+        
+        # 更新信道状态
+        self.channels[channel]["busy"] = False
+        self.channels[channel]["current_task"] = None
+        self._update_channel_status(channel)
+        
+        # 添加完成日志
+        self._add_routing_log(f"\n[{end_time.strftime('%H:%M:%S.%f')[:-3]}] "
+                             f"传输完成 - 耗时: {duration:.2f}秒")
+        
+        # 更新状态栏
+        self.status_label.config(text=f"传输完成 - 信道{channel}已释放")
+
+    def _update_channel_status(self, channel):
+        """更新信道状态显示"""
+        status = self.channels[channel]
+        label = self.channel_status_labels[channel]
+        if status["busy"]:
+            label.config(text=f"忙 - {status['current_task']}")
+        else:
+            label.config(text="空闲")
+
+    def _add_routing_log(self, message):
+        """添加路由日志"""
+        self.routing_monitor.insert(tk.END, message + "\n")
+        self.routing_monitor.see(tk.END)
+
+    def clear_routing(self):
+        """清除路由配置和监控"""
+        self.routing_frame_input.delete(1.0, tk.END)
+        self.routing_monitor.delete(1.0, tk.END)
+        self.auto_channel_var.set(True)
+        self.channel_var.set("0")
+        self.routing_mode.set("one_hop")
 
 if __name__ == "__main__":
     root = tk.Tk()
