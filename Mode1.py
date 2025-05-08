@@ -137,13 +137,10 @@ class ADConverterApp(QMainWindow):
         self.wave_type.currentIndexChanged.connect(self.on_wave_type_changed)
         input_params_layout.addWidget(self.wave_type, 0, 1)
         
-        # Frequency input
-        input_params_layout.addWidget(QLabel("Freq (kHz):"), 1, 0)
-        self.frequency = QDoubleSpinBox()
-        self.frequency.setRange(0.1, 1000.0)
-        self.frequency.setValue(10.0)
-        self.frequency.valueChanged.connect(self.update_signal)
-        input_params_layout.addWidget(self.frequency, 1, 1)
+        # 将频率输入框替换为标签显示
+        input_params_layout.addWidget(QLabel("Freq:"), 1, 0)
+        self.frequency_label = QLabel("10 kHz (Fixed)")
+        input_params_layout.addWidget(self.frequency_label, 1, 1)
         
         # Amplitude input
         input_params_layout.addWidget(QLabel("Amp (V):"), 2, 0)
@@ -167,13 +164,10 @@ class ADConverterApp(QMainWindow):
         output_group.setLayout(output_params_layout)
         middle_layout.addWidget(output_group)
         
-        # Bits selector
+        # 移除位数选择器，替换为固定显示
         output_params_layout.addWidget(QLabel("Bits:"), 0, 0)
-        self.bits = QComboBox()
-        self.bits.addItems(["8bit", "10bit", "12bit", "16bit"])
-        self.bits.setCurrentIndex(0)  # Default to 8 bits
-        self.bits.currentIndexChanged.connect(self.update_signal)
-        output_params_layout.addWidget(self.bits, 0, 1)
+        self.bits_label = QLabel("8 bit (Fixed)")
+        output_params_layout.addWidget(self.bits_label, 0, 1)
         
         # Sampling rate
         output_params_layout.addWidget(QLabel("Sample Rate (kHz):"), 1, 0)
@@ -272,12 +266,11 @@ class ADConverterApp(QMainWindow):
         try:
             # Get parameters
             wave_type = self.wave_type.currentText()
-            frequency = self.frequency.value()
+            frequency = 10.0  # 固定10kHz
             amplitude = self.amplitude.value()
             duty_cycle = self.duty_cycle.value() / 100  # Convert to fraction
             sample_rate = self.sample_rate.value()  # kHz
-            bits_text = self.bits.currentText()
-            bits = int(bits_text.replace("bit", ""))
+            bits = 8  # 固定8位
             ref_voltage = self.ref_voltage.value()
             pwm_frequency = self.pwm_frequency.value()  # kHz
             cutoff_freq = self.cutoff_freq.value()  # kHz
@@ -291,16 +284,16 @@ class ADConverterApp(QMainWindow):
             # 波形生成公式 frequency 直接用kHz
             if wave_type == "Sine":
                 analog_signal = amplitude * np.sin(2 * np.pi * frequency * t)
-                signal_title = f"sin wave (Frequency: {frequency}kHz, Amplitude: {amplitude}V)"
+                signal_title = f"Sine Wave (Fixed 10kHz, Amplitude: {amplitude}V)"
                 
             elif wave_type == "Square":
                 analog_signal = amplitude * (((t * frequency) % 1) < duty_cycle).astype(float)
                 analog_signal = analog_signal * 2 - amplitude  # Center around 0
-                signal_title = f"square wave (Frequency: {frequency}kHz, Amplitude: {amplitude}V, Duty: {duty_cycle*100}%)"
+                signal_title = f"Square Wave (Fixed 10kHz, Amplitude: {amplitude}V, Duty: {duty_cycle*100}%)"
                 
             elif wave_type == "Triangle":
                 analog_signal = amplitude * 2 * np.abs(2 * ((t * frequency) % 1) - 1) - amplitude
-                signal_title = f"Triangle wave (Frequency: {frequency}kHz, Amplitude: {amplitude}V)"
+                signal_title = f"Triangle Wave (Fixed 10kHz, Amplitude: {amplitude}V)"
             
             # Plot analog signal
             self.input_canvas.plot_analog_signal(t, analog_signal, signal_title)
@@ -312,7 +305,7 @@ class ADConverterApp(QMainWindow):
             pwm_signal = self.digital_to_pwm(t, digital_values, bits, pwm_frequency)
             
             # Plot PWM signal
-            output_title = f"Converted_Wave ({bits}bit量化, PWM频率: {pwm_frequency}kHz)"
+            output_title = f"Converted Wave (8-bit ADC, PWM Freq: {pwm_frequency}kHz)"
             self.output_canvas.plot_digital_signal(t, pwm_signal, output_title, bits)
             
             # Convert PWM signal back to analog
@@ -425,11 +418,11 @@ class ADConverterApp(QMainWindow):
     def reset_simulation(self):
         # Reset parameters to default
         self.wave_type.setCurrentIndex(0)
-        self.frequency.setValue(10.0)
+        # 移除频率重置
         self.amplitude.setValue(5.0)
         self.duty_cycle.setValue(50.0)
         self.sample_rate.setValue(1.0)
-        self.bits.setCurrentIndex(0)
+        # 移除位数重置
         self.ref_voltage.setValue(5.0)
         self.pwm_frequency.setValue(0.5)
         self.cutoff_freq.setValue(20.0)
