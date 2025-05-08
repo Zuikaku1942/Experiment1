@@ -352,7 +352,7 @@ class ADConverterApp(QMainWindow):
         # Calculate max digital value
         max_val = 2**bits - 1
         
-        # Normalize to 0 - max_val range
+        # Normalize to 0 - max_val range1111
         normalized = ((clipped_signal + reference_voltage) / (2 * reference_voltage)) * max_val
         
         # Round to nearest integer and clip to valid range
